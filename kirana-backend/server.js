@@ -21,7 +21,10 @@ const app = express();
 connectDB();
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: "*",
+  credentials: true
+}));
 app.use(express.json()); // Body parser json request ke liye[cite: 2]
 
 // Picture Static Folder Mapping
