@@ -1,0 +1,32 @@
+.category-filter-panel {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 15px;
+}
+.category-filter-panel button {
+  padding: 8px 16px;
+  background-color: white;
+  border: 1px solid #081b31;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #081b31;
+  transition: all 0.3s;
+}
+.category-filter-panel button.active, .category-filter-panel button:hover {
+  background-color: #081b31;
+  color: white;
+}
+.add-to-cart-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 8px;
+  background-color: #fad155;
+  border: 1px solid #a88734;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.add-to-cart-btn:hover {
+  background-color: #f7c324;
+}
