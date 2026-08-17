@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'https://sachin-kirana-store.onrender.com', // Aapke Express server ka URL
+  baseURL: 'https://sachin-kirana-store.onrender.com/api', // Aapke Express server ka URL
 });
 
 API.interceptors.request.use(
