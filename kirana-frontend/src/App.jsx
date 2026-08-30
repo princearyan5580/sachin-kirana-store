@@ -82,7 +82,7 @@ function App() {
               </div>
               <div>
                 <h1 className="font-extrabold text-slate-900 leading-none tracking-tight text-sm sm:text-base uppercase truncate">
-                  Sachin Store
+                  Sachin Dipartmental Store
                 </h1>
                 <span className="text-[9px] sm:text-[10px] text-sky-600 font-semibold tracking-wider uppercase">
                   Grocery Platform
