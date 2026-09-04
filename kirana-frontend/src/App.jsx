@@ -22,7 +22,7 @@ function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-  const { user, logout } = useAuth();
+  const { user, login, register, logout } = useAuth();
 
   const categories = [
     { id: 'Rice', icon: '🌾' },
@@ -305,6 +305,8 @@ function App() {
       <AuthModal 
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}
+        login={login}
+        register={register}
       />
 
       <AdminDashboard 
