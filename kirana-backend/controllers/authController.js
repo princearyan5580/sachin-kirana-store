@@ -1,36 +1,28 @@
 exports.login = async (req, res) => {
+  console.log("👉 Incoming Login Body:", req.body); // 👈 Ye exact payload dikhayega
+
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
+      console.log("❌ Missing email or password in request body");
       return res.status(400).json({ success: false, message: 'Email aur password provide karein' });
     }
 
     const cleanEmail = email.toLowerCase().trim();
-    let user = await User.findOne({ email: cleanEmail });
+    const user = await User.findOne({ email: cleanEmail });
 
-    // Agar user database me nahi hai, toh automatic Admin create kar do
     if (!user) {
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
-      user = await User.create({
-        name: 'Sachin Store Admin',
-        email: cleanEmail,
-        password: hashedPassword,
-        role: 'admin'
-      });
-    }
-
-    // Direct password match (Bypass for testing & smooth access)
-    const isMatch = (password === '12345678') || (await bcrypt.compare(password, user.password));
-    if (!isMatch) {
+      console.log("❌ User not found for email:", cleanEmail);
       return res.status(400).json({ success: false, message: 'Invalid credentials!' });
     }
 
-    // Hamesha admin role set rakhein
-    if (user.role !== 'admin') {
-      user.role = 'admin';
-      await user.save();
+    // Direct match check (Atlas document se bcrypt compare)
+    const isMatch = await bcrypt.compare(password, user.password);
+    console.log("👉 Password match status:", isMatch);
+
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: 'Invalid credentials!' });
     }
 
     const token = generateToken(user._id, user.role);
@@ -46,7 +38,7 @@ exports.login = async (req, res) => {
       }
     });
   } catch (err) {
-    console.error("Login Error:", err);
+    console.error("Login Controller Error:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 };

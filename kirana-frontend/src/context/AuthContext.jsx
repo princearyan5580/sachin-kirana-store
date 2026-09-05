@@ -21,22 +21,20 @@ export const AuthProvider = ({ children }) => {
 
   const [loading] = useState(false);
 
+  // kirana-frontend/src/context/AuthContext.jsx
+
   const login = async (email, password) => {
     try {
       const res = await API.post('/auth/login', { email, password });
-      if (res.data.success) {
+      if (res.data && res.data.token) {
         localStorage.setItem('token', res.data.token);
-        localStorage.setItem('user', JSON.stringify(res.data.user));
-        API.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
         setUser(res.data.user);
         return { success: true };
       }
-      return { success: false, message: res.data.message || 'Login failed' };
-    } catch (err) {
-      return { 
-        success: false, 
-        message: err.response?.data?.message || err.message || 'Login system failure' 
-      };
+      return { success: false, message: res.data?.message || 'Login failed' };
+    } catch (error) {
+      const msg = error.response?.data?.message || 'Invalid credentials!';
+      return { success: false, message: msg };
     }
   };
 
