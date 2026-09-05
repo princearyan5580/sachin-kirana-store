@@ -1,11 +1,20 @@
+// kirana-backend/routes/orderRoutes.js
 const express = require('express');
 const router = express.Router();
-const { login, register, updateProfile, changePassword } = require('../controllers/authController');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, admin } = require('../middleware/authMiddleware');
 
-router.post('/register', register);
-router.post('/login', login);
-router.put('/profile', protect, updateProfile);
-router.put('/change-password', protect, changePassword);
+// Controller methods import
+const { 
+  createOrder, 
+  getAllOrders, 
+  getUserOrders, 
+  updateOrderStatus 
+} = require('../controllers/orderController');
+
+// All orders (Admin fetch karta hai)
+router.get('/', protect, admin, getAllOrders);
+router.get('/myorders', protect, getUserOrders);
+router.post('/', protect, createOrder);
+router.put('/:id', protect, admin, updateOrderStatus);
 
 module.exports = router;
