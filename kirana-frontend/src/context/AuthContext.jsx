@@ -23,9 +23,30 @@ export const AuthProvider = ({ children }) => {
 
   // kirana-frontend/src/context/AuthContext.jsx
 
-  const login = async (email, password) => {
+  // kirana-frontend/src/context/AuthContext.jsx
+
+  const login = async (emailInput, passwordInput) => {
     try {
-      const res = await API.post('/auth/login', { email, password });
+      let finalEmail = emailInput;
+      let finalPassword = passwordInput;
+
+      // Agar data object me pass hua ho: { email, password }
+      if (typeof emailInput === 'object' && emailInput !== null) {
+        finalEmail = emailInput.email || emailInput.username;
+        finalPassword = emailInput.password;
+      }
+
+      // Agar email ke andar dobara nested object aa gaya ho (Payload bug fix)
+      if (typeof finalEmail === 'object' && finalEmail !== null) {
+        finalPassword = finalEmail.password || finalPassword;
+        finalEmail = finalEmail.email;
+      }
+
+      const res = await API.post('/auth/login', {
+        email: typeof finalEmail === 'string' ? finalEmail.trim() : '',
+        password: finalPassword,
+      });
+
       if (res.data && res.data.token) {
         localStorage.setItem('token', res.data.token);
         setUser(res.data.user);
