@@ -8,11 +8,11 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
+// 🟢 1. Create Razorpay Order
 const createRazorpayOrder = async (req, res) => {
   try {
     const { amount } = req.body;
 
-    // Zero check validate karne ke liye safely calculate karein
     const options = {
       amount: Math.round(Number(amount) * 100), 
       currency: "INR",
@@ -30,6 +30,7 @@ const createRazorpayOrder = async (req, res) => {
   }
 };
 
+// 🟢 2. Verify Razorpay Payment & Place Order
 const verifyPayment = async (req, res) => {
   try {
     const { 
@@ -74,13 +75,13 @@ const verifyPayment = async (req, res) => {
   }
 };
 
+// 🟢 3. Logged-in User Order History
 const getOrderHistory = async (req, res) => {
   try {
-    if(!req.user) {
+    if (!req.user) {
       return res.status(401).json({ success: false, message: "Not Authorized" });
     }
 
-    // Sirf is active user ke orders database se uthayenge
     const orders = await Order.find({ userId: req.user._id })
       .populate('userId', 'name email')
       .populate('items.productId', 'name image_url unit') 
@@ -100,16 +101,18 @@ const getOrderHistory = async (req, res) => {
   }
 };
 
+// 🟢 4. Admin Dashboard API (/api/orders/admin/dashboard)
 const getAdminDashboard = async (req, res) => {
   try {
-    // Agar Order model hai toh orders find karein
-    const Order = require('../models/Order');
-    const orders = await Order.find().sort({ createdAt: -1 });
+    const orders = await Order.find()
+      .populate('userId', 'name email')
+      .populate('items.productId', 'name image_url unit')
+      .sort({ createdAt: -1 });
 
     const totalOrders = orders.length;
-    const totalRevenue = orders.reduce((acc, item) => acc + (item.totalAmount || item.totalPrice || 0), 0);
+    const totalRevenue = orders.reduce((acc, item) => acc + (Number(item.totalAmount) || 0), 0);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       orders,
       totalOrders,
@@ -117,8 +120,7 @@ const getAdminDashboard = async (req, res) => {
     });
   } catch (err) {
     console.error("Dashboard error:", err);
-    // Agar table empty ho ya fail ho tab bhi empty data return karein taaki frontend crash na ho
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       orders: [],
       totalOrders: 0,
@@ -127,4 +129,29 @@ const getAdminDashboard = async (req, res) => {
   }
 };
 
-module.exports = { createRazorpayOrder, verifyPayment, getOrderHistory, getAdminDashboard};
+// 🟢 5. Admin Order Status Update
+const updateOrderStatus = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    if (req.body.status) {
+      order.status = req.body.status;
+    }
+
+    await order.save();
+    return res.status(200).json({ success: true, message: 'Order status updated', order });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+module.exports = { 
+  createRazorpayOrder, 
+  verifyPayment, 
+  getOrderHistory, 
+  getAdminDashboard,
+  updateOrderStatus
+};
