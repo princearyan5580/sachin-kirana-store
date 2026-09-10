@@ -1,44 +1,31 @@
+// kirana-backend/routes/orderRoutes.js
 const express = require('express');
 const router = express.Router();
+const controller = require('../controllers/orderController');
 
-// 1. Safe Auth Middleware Import (Undefined crash protection)
+// Middleware safely import
 let protect = (req, res, next) => next();
 let admin = (req, res, next) => next();
-
 try {
-  const authMiddleware = require('../middleware/authMiddleware');
-  if (typeof authMiddleware.protect === 'function') protect = authMiddleware.protect;
-  if (typeof authMiddleware.admin === 'function') admin = authMiddleware.admin;
-  if (typeof authMiddleware === 'function') protect = authMiddleware;
-} catch (e) {
-  console.warn("Auth middleware import fallback used:", e.message);
-}
+  const auth = require('../middleware/authMiddleware');
+  if (typeof auth.protect === 'function') protect = auth.protect;
+  if (typeof auth.admin === 'function') admin = auth.admin;
+} catch (e) {}
 
-// 2. Controller Import
-const orderController = require('../controllers/orderController');
+// Admin Dashboard
+router.get('/admin/dashboard', protect, admin, (req, res) => controller.getAdminDashboard(req, res));
 
-// Safe controller wrapper to guarantee a function is always passed
-const getHandler = (fnName) => {
-  if (orderController && typeof orderController[fnName] === 'function') {
-    return orderController[fnName];
-  }
-  return (req, res) => res.status(501).json({ success: false, message: `${fnName} handler not implemented` });
-};
+// User History
+router.get('/history', protect, (req, res) => controller.getOrderHistory(req, res));
+router.get('/myorders', protect, (req, res) => controller.getOrderHistory(req, res));
 
-// 🟢 1. Admin Dashboard Route
-router.get('/admin/dashboard', protect, admin, getHandler('getAdminDashboard'));
+// Payment Endpoints
+router.post('/', protect, (req, res) => controller.createRazorpayOrder(req, res));
+router.post('/checkout', protect, (req, res) => controller.createRazorpayOrder(req, res));
+router.post('/razorpay', protect, (req, res) => controller.createRazorpayOrder(req, res));
+router.post('/verify', protect, (req, res) => controller.verifyPayment(req, res));
 
-// 🟢 2. User History Routes
-router.get('/history', protect, getHandler('getOrderHistory'));
-router.get('/myorders', protect, getHandler('getOrderHistory'));
-
-// 🟢 3. Payment / Checkout Endpoints (Covering every URL path)
-router.post('/', protect, getHandler('createRazorpayOrder'));
-router.post('/checkout', protect, getHandler('createRazorpayOrder'));
-router.post('/razorpay', protect, getHandler('createRazorpayOrder'));
-router.post('/verify', protect, getHandler('verifyPayment'));
-
-// 🟢 4. Admin Update Status
-router.put('/:id', protect, admin, getHandler('updateOrderStatus'));
+// Admin Update
+router.put('/:id', protect, admin, (req, res) => controller.updateOrderStatus(req, res));
 
 module.exports = router;
