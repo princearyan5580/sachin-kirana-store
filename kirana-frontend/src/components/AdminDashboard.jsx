@@ -23,12 +23,15 @@ const AdminDashboard = ({ isOpen, onClose }) => {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
       const res = await API.get('/orders/admin/dashboard', config);
-      if (res.data.success) {
-        setMetrics(res.data.metrics);
-        setOrders(res.data.orders);
+      
+      if (res.data) {
+        const rev = res.data.metrics?.totalRevenue ?? res.data.totalRevenue ?? res.data.stats?.totalRevenue ?? 0;
+        const cnt = res.data.metrics?.totalOrdersCount ?? res.data.totalOrdersCount ?? res.data.totalOrders ?? 0;
+        setMetrics({ totalRevenue: rev, totalOrdersCount: cnt });
+        setOrders(res.data.orders || []);
       }
       const prodRes = await API.get('/products');
-      setProducts(prodRes.data);
+      setProducts(prodRes.data || []);
     } catch (err) {
       console.error(err);
     }
@@ -50,11 +53,13 @@ const AdminDashboard = ({ isOpen, onClose }) => {
         ]);
 
         if (isMounted) {
-          if (ordersRes.data.success) {
-            setMetrics(ordersRes.data.metrics);
-            setOrders(ordersRes.data.orders);
+          if (ordersRes.data) {
+            const rev = ordersRes.data.metrics?.totalRevenue ?? ordersRes.data.totalRevenue ?? ordersRes.data.stats?.totalRevenue ?? 0;
+            const cnt = ordersRes.data.metrics?.totalOrdersCount ?? ordersRes.data.totalOrdersCount ?? ordersRes.data.totalOrders ?? 0;
+            setMetrics({ totalRevenue: rev, totalOrdersCount: cnt });
+            setOrders(ordersRes.data.orders || []);
           }
-          setProducts(prodRes.data);
+          setProducts(prodRes.data || []);
         }
       } catch (err) {
         if (isMounted) {
@@ -164,14 +169,14 @@ const AdminDashboard = ({ isOpen, onClose }) => {
               <div className="bg-sky-50 border border-sky-100 p-4 rounded-xl flex justify-between items-center shadow-sm">
                 <div>
                   <span className="text-xs text-sky-600 font-bold uppercase tracking-wider block">Gross Turnover</span>
-                  <span className="text-xl font-black text-slate-900">₹{metrics.totalRevenue}</span>
+                  <span className="text-xl font-black text-slate-900">₹{metrics?.totalRevenue ?? 0}</span>
                 </div>
                 <span className="text-2xl">💰</span>
               </div>
               <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-xl flex justify-between items-center shadow-sm">
                 <div>
                   <span className="text-xs text-emerald-600 font-bold uppercase tracking-wider block">Completed Transactions</span>
-                  <span className="text-xl font-black text-slate-900">{metrics.totalOrdersCount} Shipments</span>
+                  <span className="text-xl font-black text-slate-900">{metrics?.totalOrdersCount ?? 0} Shipments</span>
                 </div>
                 <span className="text-2xl">📦</span>
               </div>

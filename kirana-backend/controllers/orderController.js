@@ -1,4 +1,4 @@
-// kirana-backend/controllers/orderController.js
+// kirana-backend/controllers/orderController.js -> getAdminDashboard function
 
 const getAdminDashboard = async (req, res) => {
   try {
@@ -8,47 +8,32 @@ const getAdminDashboard = async (req, res) => {
       .sort({ createdAt: -1 });
 
     const safeOrders = orders || [];
-    const totalOrders = safeOrders.length;
+    const totalOrdersCount = safeOrders.length;
     const totalRevenue = safeOrders.reduce(
       (acc, item) => acc + (Number(item.totalAmount) || Number(item.totalPrice) || 0), 
       0
     );
 
-    const statsPayload = {
-      totalOrders,
-      totalRevenue,
-      totalSales: totalRevenue,
-      totalUsers: 1
+    const metricsData = {
+      totalOrdersCount,
+      totalRevenue
     };
 
-    // Har possible key provide karein taaki frontend kisi bhi key se padhe crash na ho
     return res.status(200).json({
       success: true,
       orders: safeOrders,
-      data: {
-        orders: safeOrders,
-        totalOrders,
-        totalRevenue,
-        stats: statsPayload
-      },
-      stats: statsPayload,
-      summary: statsPayload,
-      analytics: statsPayload,
-      totalOrders,
-      totalRevenue
+      metrics: metricsData,      // 👈 Frontend exact ye key expect kar raha hai
+      totalRevenue,
+      totalOrdersCount
     });
   } catch (err) {
     console.error("Dashboard error:", err);
-    const fallbackStats = { totalOrders: 0, totalRevenue: 0, totalSales: 0 };
     return res.status(200).json({
       success: true,
       orders: [],
-      data: { orders: [], ...fallbackStats, stats: fallbackStats },
-      stats: fallbackStats,
-      summary: fallbackStats,
-      analytics: fallbackStats,
-      totalOrders: 0,
-      totalRevenue: 0
+      metrics: { totalOrdersCount: 0, totalRevenue: 0 },
+      totalRevenue: 0,
+      totalOrdersCount: 0
     });
   }
 };
