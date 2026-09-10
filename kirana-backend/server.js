@@ -38,6 +38,7 @@ app.get('/', (req, res) => {
 // API Routes Mapping
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/checkout', orderRoutes);
 app.use('/api/auth', authRoutes); // 👈 2. Auth Routes ko API Pipeline me Link Kiya
 
 // Server listening listener
