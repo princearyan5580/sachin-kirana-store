@@ -1,4 +1,4 @@
-// routes/orderRoutes.js
+// kirana-backend/routes/orderRoutes.js
 const express = require('express');
 const router = express.Router();
 const { protect, admin } = require('../middleware/authMiddleware');
@@ -10,18 +10,19 @@ const {
   updateOrderStatus
 } = require('../controllers/orderController');
 
-// 🟢 Admin Dashboard Route (Fixes 404)
+// 🟢 1. Admin Dashboard Route
 router.get('/admin/dashboard', protect, admin, getAdminDashboard);
 
-// 🟢 User History Route
+// 🟢 2. User History Routes
 router.get('/history', protect, getOrderHistory);
 router.get('/myorders', protect, getOrderHistory);
 
-// 🟢 Payment Endpoints
+// 🟢 3. Payment Endpoints (Donon alias add kiye: /checkout aur /razorpay)
+router.post('/checkout', protect, createRazorpayOrder); // 👈 Ye frontend call kar raha hai
 router.post('/razorpay', protect, createRazorpayOrder);
 router.post('/verify', protect, verifyPayment);
 
-// 🟢 Admin Update Status
+// 🟢 4. Admin Update Status
 router.put('/:id', protect, admin, updateOrderStatus);
 
 module.exports = router;
