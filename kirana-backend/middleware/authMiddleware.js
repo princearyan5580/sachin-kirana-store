@@ -1,29 +1,22 @@
-// middleware/authMiddleware.js
+// kirana-backend/middleware/authMiddleware.js
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 const protect = async (req, res, next) => {
-  try {
-    let token;
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+  let token;
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    try {
       token = req.headers.authorization.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'sachinSecretKey123');
+      req.user = await User.findById(decoded.id).select('-password');
+      return next();
+    } catch (error) {
+      return res.status(401).json({ success: false, message: 'Not authorized, token failed' });
     }
+  }
 
-    if (!token) {
-      return res.status(401).json({ success: false, message: "Not authorized, token missing!" });
-    }
-
-    // Token Verify
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secretKey');
-    req.user = await User.findById(decoded.id).select('-password');
-
-    if (!req.user) {
-      return res.status(401).json({ success: false, message: "User account not found!" });
-    }
-
-    next();
-  } catch (err) {
-    return res.status(401).json({ success: false, message: "Token failed or expired!" });
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'Not authorized, no token' });
   }
 };
 
@@ -31,8 +24,9 @@ const admin = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {
     next();
   } else {
-    return res.status(403).json({ success: false, message: "Access denied: Admin only!" });
+    res.status(403).json({ success: false, message: 'Not authorized as an admin' });
   }
 };
 
+// 🟢 Both functions must be exported
 module.exports = { protect, admin };

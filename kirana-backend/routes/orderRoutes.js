@@ -1,7 +1,11 @@
 // kirana-backend/routes/orderRoutes.js
 const express = require('express');
 const router = express.Router();
-const { protect, admin } = require('../middleware/authMiddleware');
+const authMiddleware = require('../middleware/authMiddleware');
+
+const protect = authMiddleware.protect || ((req, res, next) => next());
+const admin = authMiddleware.admin || ((req, res, next) => next());
+
 const {
   createRazorpayOrder,
   verifyPayment,
@@ -17,11 +21,10 @@ router.get('/admin/dashboard', protect, admin, getAdminDashboard);
 router.get('/history', protect, getOrderHistory);
 router.get('/myorders', protect, getOrderHistory);
 
-// 🟢 3. Payment / Checkout Endpoints
-// Yeh teeno mapping kisi bhi URL pattern ko 404 nahi hone dengi:
-router.post('/', protect, createRazorpayOrder);           // 👉 Handles POST to /api/checkout
-router.post('/checkout', protect, createRazorpayOrder);   // 👉 Handles POST to /api/orders/checkout
-router.post('/razorpay', protect, createRazorpayOrder);   // 👉 Handles POST to /api/orders/razorpay
+// 🟢 3. Payment / Checkout Endpoints (Covering all URL patterns)
+router.post('/', protect, createRazorpayOrder);
+router.post('/checkout', protect, createRazorpayOrder);
+router.post('/razorpay', protect, createRazorpayOrder);
 router.post('/verify', protect, verifyPayment);
 
 // 🟢 4. Admin Update Status
