@@ -17,9 +17,11 @@ router.get('/admin/dashboard', protect, admin, getAdminDashboard);
 router.get('/history', protect, getOrderHistory);
 router.get('/myorders', protect, getOrderHistory);
 
-// 🟢 3. Payment Endpoints (Donon alias add kiye: /checkout aur /razorpay)
-router.post('/checkout', protect, createRazorpayOrder); // 👈 Ye frontend call kar raha hai
-router.post('/razorpay', protect, createRazorpayOrder);
+// 🟢 3. Payment / Checkout Endpoints
+// Yeh teeno mapping kisi bhi URL pattern ko 404 nahi hone dengi:
+router.post('/', protect, createRazorpayOrder);           // 👉 Handles POST to /api/checkout
+router.post('/checkout', protect, createRazorpayOrder);   // 👉 Handles POST to /api/orders/checkout
+router.post('/razorpay', protect, createRazorpayOrder);   // 👉 Handles POST to /api/orders/razorpay
 router.post('/verify', protect, verifyPayment);
 
 // 🟢 4. Admin Update Status
